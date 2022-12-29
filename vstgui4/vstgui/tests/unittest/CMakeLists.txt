@@ -22,6 +22,7 @@ set(${target}_sources
 	"${VSTGUI_TEST_BASE}lib/controls/csegmentbutton_test.cpp"
 	"${VSTGUI_TEST_BASE}lib/controls/ctextbutton_test.cpp"
 	"${VSTGUI_TEST_BASE}lib/controls/cxypad_test.cpp"
+	"${VSTGUI_TEST_BASE}lib/algorithm_test.cpp"
 	"${VSTGUI_TEST_BASE}lib/cbitmap_test.cpp"
 	"${VSTGUI_TEST_BASE}lib/cbuttonstate_test.cpp"
 	"${VSTGUI_TEST_BASE}lib/cclipboard_test.cpp"
@@ -102,12 +103,6 @@ if(CMAKE_HOST_APPLE)
 		"-framework QuartzCore"
 		"-framework Accelerate"
 	)
-	if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL 11.0)
-		set(${target}_PLATFORM_LIBS
-			${${target}_PLATFORM_LIBS}
-			"-framework UniformTypeIdentifiers"
-		)
-	endif()
 endif()
 
 ##########################################################################################
@@ -174,7 +169,7 @@ else()
 	)
 
 	add_executable(${target} ${${target}_sources})
-	target_link_libraries(${target}
+	target_link_libraries(${target} PRIVATE
 		${${target}_PLATFORM_LIBS}
 	)
 
@@ -193,6 +188,15 @@ else()
 	endif()
 
 endif(VSTGUI_USE_XCODE_XCTEST)
+
+if(CMAKE_HOST_APPLE)
+	if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL 11.0)
+		target_compile_definitions(${target} "VSTGUI_USE_OBJC_UTTYPE")
+		target_link_libraries(${target} PRIVATE
+			"-framework UniformTypeIdentifiers"
+		)
+	endif()
+endif()
 
 #if(CMAKE_HOST_APPLE)
 #  option(VSTGUI_ENABLE_CODECOVERAGE "Generate Code Coverage Data" OFF)

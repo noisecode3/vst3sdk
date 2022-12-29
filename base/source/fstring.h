@@ -278,6 +278,11 @@ public:
 
 	bool isNormalized (UnicodeNormalization = kUnicodeNormC); ///< On PC only kUnicodeNormC is working
 
+#if SMTG_OS_WINDOWS
+	ConstString (const wchar_t* str, int32 length = -1) : ConstString (wscast (str), length) {}
+	operator const wchar_t* () const { return wscast (text16 ());}
+#endif
+
 #if SMTG_OS_MACOS
 	virtual void* toCFStringRef (uint32 encoding = 0xFFFF, bool mutableCFString = false) const;	///< CFString conversion
 #endif
@@ -456,6 +461,11 @@ public:
 	void fromUTF8 (const char8* utf8String);				///< Assigns from UTF8 string
 	bool normalize (UnicodeNormalization = kUnicodeNormC);	///< On PC only kUnicodeNormC is working
 
+#if SMTG_OS_WINDOWS
+	String (const wchar_t* str, int32 length = -1, bool isTerminated = true) : String (wscast (str), length, isTerminated) {}
+	String& operator= (const wchar_t* str) {return String::operator= (wscast (str)); }
+#endif
+
 #if SMTG_OS_MACOS
 	virtual bool fromCFStringRef (const void*, uint32 encoding = 0xFFFF);	///< CFString conversion
 #endif
@@ -466,6 +476,7 @@ protected:
 	bool resize (uint32 newSize, bool wide, bool fill = false);
 
 private:
+	bool _toWideString (const char8* src, int32 length, uint32 sourceCodePage = kCP_Default);
 	void tryFreeBuffer ();
 	bool checkToMultiByte (uint32 destCodePage = kCP_Default) const; // to remove debug code from inline - const_cast inside!!!
 };

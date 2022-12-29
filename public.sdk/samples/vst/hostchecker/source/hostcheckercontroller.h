@@ -63,6 +63,12 @@ const int32 kMaxLatency = 8192;
 const uint32 kParamWarnCount = 8;
 const uint32 kParamWarnBitCount = 24;
 const uint32 kParamWarnStepCount = 1 << kParamWarnBitCount;
+
+const uint32 kParamUnitStruct1Count = 4;
+const uint32 kParamUnitStruct2Count = 4;
+const uint32 kParamUnitStruct3Count = 2;
+const uint32 kParamUnitStructCount =
+    2 * (kParamUnitStruct1Count * kParamUnitStruct2Count * kParamUnitStruct3Count + 1);
 }
 
 namespace Vst {
@@ -88,9 +94,13 @@ enum
 	kProcessWarnTag,
 	kLastTag = kProcessWarnTag + HostChecker::kParamWarnCount,
 
+	kParamUnitStructStart,
+	kParamUnitStructEnd = kParamUnitStructStart + HostChecker::kParamUnitStructCount,
+
 	// for Units
 	kUnitId = 1234,
-	kUnit2Id = 1235
+	kUnit2Id = 1235,
+	kUnitParamIdStart = 2345,
 };
 
 class EditorSizeController;
@@ -214,7 +224,7 @@ public:
 		return (IEditController*)new HostCheckerController ();
 	}
 
-	void addFeatureLog (int32 iD, int32 count = 1, bool addToLastCount = true);
+	void addFeatureLog (int64 iD, int32 count = 1, bool addToLastCount = true);
 	bool getSavedSize (ViewRect& size) const
 	{
 		if (sizeFactor <= 0)
@@ -226,7 +236,7 @@ public:
 
 protected:
 	void extractCurrentInfo (EditorView* editor);
-	float updateScoring (int32 iD);
+	float updateScoring (int64 iD);
 	void onProgressTimer (VSTGUI::CVSTGUITimer*);
 
 	std::map<VSTGUI::VST3Editor*, VSTGUI::SharedPointer<VSTGUI::CDataBrowser>> mDataBrowserMap;
@@ -259,7 +269,7 @@ protected:
 		bool use {false};
 	};
 
-	using ScoreMap = std::map<uint32, ScoreEntry>;
+	using ScoreMap = std::map<int64, ScoreEntry>;
 	ScoreMap mScoreMap;
 
 	VSTGUI::CVSTGUITimer* mProgressTimer {nullptr};

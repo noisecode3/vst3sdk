@@ -78,6 +78,7 @@
 	#define SMTG_PTHREADS	0
 
 	#define SMTG_EXPORT_SYMBOL __declspec (dllexport)
+	#define SMTG_HIDDEN_SYMBOL
 
 	#ifndef _CRT_SECURE_NO_WARNINGS
 		#define _CRT_SECURE_NO_WARNINGS
@@ -108,8 +109,8 @@
 		#define SMTG_CPP14 (__cplusplus >= 201402L || (defined (_MSVC_LANG) && _MSVC_LANG >= 201402L))
 		#define SMTG_CPP17 (__cplusplus >= 201703L || (defined (_MSVC_LANG) && _MSVC_LANG >= 201703L))
 		#define SMTG_HAS_NOEXCEPT (_MSC_FULL_VER >= 190023026 || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1300))
-		#define SMTG_HAS_CPP11_CONSTEXPR (_MSC_FULL_VER >= 190024210L || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1500))
-		#define SMTG_HAS_CPP14_CONSTEXPR (((_MSC_VER >= 1915L) && (_MSVC_LANG >= 201402L)) || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER > 1700))
+		#define SMTG_HAS_CPP11_CONSTEXPR (_MSC_FULL_VER >= 190024210L || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1500) || (defined(__MINGW32__) && SMTG_CPP11))
+		#define SMTG_HAS_CPP14_CONSTEXPR (((_MSC_VER >= 1915L) && (_MSVC_LANG >= 201402L)) || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER > 1700) || (defined(__MINGW32__) && SMTG_CPP14))
 	#endif
 
 	#define SMTG_DEPRECATED_ATTRIBUTE(message) __declspec (deprecated ("Is Deprecated: " message))
@@ -149,6 +150,7 @@
 	#define SMTG_PTHREADS	1
 
 	#define SMTG_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
+	#define SMTG_HIDDEN_SYMBOL __attribute__ ((visibility ("hidden")))
 
 	#if __LP64__
 		#define SMTG_PLATFORM_64 1
@@ -213,6 +215,7 @@
 	#define SMTG_PTHREADS	1
 
 	#define SMTG_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
+	#define SMTG_HIDDEN_SYMBOL __attribute__ ((visibility ("hidden")))
 
 	#if !defined(__PLIST__) && !defined(SMTG_DISABLE_DEFAULT_DIAGNOSTICS)
 		#ifdef __clang__

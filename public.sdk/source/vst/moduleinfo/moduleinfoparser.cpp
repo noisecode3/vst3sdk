@@ -100,12 +100,18 @@ struct ModuleInfoJsonParser
 		throw parse_error ("Expect a String here", value);
 	}
 
-	int64_t getInteger (const JSON::Value& value) const
+	template <typename T>
+	T getInteger (const JSON::Value& value) const
 	{
 		if (auto number = value.asNumber ())
 		{
 			if (auto result = number->getInteger ())
-				return *result;
+			{
+				if (result > static_cast<int64_t> (std::numeric_limits<T>::max ()) ||
+				    result < static_cast<int64_t> (std::numeric_limits<T>::min ()))
+					throw parse_error ("Value is out of range here", value);
+				return static_cast<T> (*result);
+			}
 			throw parse_error ("Expect an Integer here", value);
 		}
 		throw parse_error ("Expect a Number here", value);
@@ -295,14 +301,14 @@ struct ModuleInfoJsonParser
 				{
 					if (parsed & ParsedBits::ClassFlags)
 						throw parse_error ("Only one 'Class Flags' key allowed", el.name ());
-					ci.flags = getInteger (el.value ());
+					ci.flags = getInteger<uint32_t> (el.value ());
 					parsed |= ParsedBits::ClassFlags;
 				}
 				else if (elementName == "Cardinality")
 				{
 					if (parsed & ParsedBits::Cardinality)
 						throw parse_error ("Only one 'Cardinality' key allowed", el.name ());
-					ci.cardinality = getInteger (el.value ());
+					ci.cardinality = getInteger<int32_t> (el.value ());
 					parsed |= ParsedBits::Cardinality;
 				}
 				else if (elementName == "Snapshots")
@@ -366,7 +372,7 @@ struct ModuleInfoJsonParser
 		{
 			auto obj = el.value ().asObject ();
 			if (!obj)
-				throw parse_error ("Expext Object here", el.value ());
+				throw parse_error ("Expect Object here", el.value ());
 
 			ModuleInfo::Compatibility compat;
 			for (const auto& objEl : *obj)
@@ -378,7 +384,7 @@ struct ModuleInfoJsonParser
 				{
 					auto oldElArr = objEl.value ().asArray ();
 					if (!oldElArr)
-						throw parse_error ("Expext Array here", objEl.value ());
+						throw parse_error ("Expect Array here", objEl.value ());
 					for (const auto& old : *oldElArr)
 					{
 						compat.oldCID.emplace_back (getText (old.value ()));
@@ -386,9 +392,9 @@ struct ModuleInfoJsonParser
 				}
 			}
 			if (compat.newCID.empty ())
-				throw parse_error ("Expext New CID here", el.value ());
+				throw parse_error ("Expect New CID here", el.value ());
 			if (compat.oldCID.empty ())
-				throw parse_error ("Expext Old CID here", el.value ());
+				throw parse_error ("Expect Old CID here", el.value ());
 			info.compatibility.emplace_back (std::move (compat));
 		}
 	}
